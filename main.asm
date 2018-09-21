@@ -4,12 +4,21 @@ main:
 	li $v0, 4
 	la $a0, backtomain
 	syscall
+	jal readFile
+	jal closeFile
+	# prepares showImage args
+		# a0: pointer to buffer start
+		# a1: iterator (starts at 0)
+		# a2: rowXcols value (once buffer is a memory array)
+	move $a0, $s0
+	move $a1, $zero
+	lw $t0, imageRows
+	lw $t1, imageCols
+	mulu $a2, $t0, $t1
+	jal showImage
+	comeBackMain:
 	li $v0, 10
 	syscall
-	
-	
-	
-
 
 openFile:
 	# syscall 13 
@@ -21,9 +30,10 @@ openFile:
 	li $a1, 0 # open for reading
 	li $a2, 0 # mode 0
 	syscall
+	# syscall returns to v0, so stores it to s0
 	move $s0, $v0
-	addi $sp, $sp, -4
 	# needs to queue value from $ra to go back to main
+	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal openFileError
 	# dequeue to jump back to main
@@ -38,17 +48,52 @@ openFileError:
 	bne $t1, $zero, exitError
 	jr $ra
 
+closeFile:
+	li $v0, 16 # syscall for close file
+	move $a0, $s0 # file descriptor
+	syscall
+	jr $ra
+
 exitError:
 	# exit lable is called everytime something goes wrong
 	# syscall 10 exits
-	la $a0, exitMessage
 	li $v0, 4
+	la $a0, exitMessage
 	syscall # print exit message
 	li $v0, 10
 	syscall
+	
+readFile:
+	# Reads file to memory from reg address
+	# syscall 16
+		# $a0: file descriptor ($s0)
+		# $a1: address buffer
+		# $a2: buffer lenght (512x512 = 262144)
+	li $v0, 16
+	move $a0, $s0
+	la $a1, buffer
+	li $a2, 262144
+	syscall
+	jr $ra
+
+showImage:
+	# iterates over buffer and save its values to gp in order to show image
+		# a0: pointer to buffer start
+		# a1: iterator (starts at 0)
+		# a2: rowXcols value (once buffer is a memory array)
+	slt $t0, $a2, $a1
+	bnez $t0, comeBackMain # if a1 > a2 go back to main where you belong
+	sw $a0, ($gp)
+	addi $a0, $a0, 4 # pointer for buffer skips a word
+	addi $a1, $a1, 1 # iterator++
+	addi $gp, $gp, 4 # gp skips a word
+	j showImage 
 	
 	
 .data
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
+	buffer:		.space 263000
+	imageRows:	.word 512
+	imageCols:	.word 512
