@@ -65,14 +65,14 @@ exitError:
 	
 readFile:
 	# Reads file to memory from reg address
-	# syscall 16
+	# syscall 14
 		# $a0: file descriptor ($s0)
 		# $a1: address buffer
 		# $a2: buffer lenght (512x512 = 262144)
-	li $v0, 16
+	li $v0, 14
 	move $a0, $s0
 	la $a1, buffer
-	li $a2, 262144
+	li $a2, 786432
 	syscall
 	jr $ra
 
@@ -81,19 +81,20 @@ showImage:
 		# a0: pointer to buffer start
 		# a1: iterator (starts at 0)
 		# a2: rowXcols value (once buffer is a memory array)
-	slt $t0, $a2, $a1
+	slt $t0, $a2, $a0
 	bnez $t0, comeBackMain # if a1 > a2 go back to main where you belong
-	sw $a0, ($gp)
-	addi $a0, $a0, 4 # pointer for buffer skips a word
+	move $t2, $a0 
+	sll $t2, $t2, 8
+	sw $t2, ($gp)
+	addi $a0, $a0, 1 # pointer for buffer skips a word
 	addi $a1, $a1, 1 # iterator++
 	addi $gp, $gp, 4 # gp skips a word
 	j showImage 
-	
-	
+
 .data
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
-	buffer:		.space 263000
+	buffer:		.space 524288
 	imageRows:	.word 512
 	imageCols:	.word 512
