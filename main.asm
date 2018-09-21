@@ -86,7 +86,7 @@ showImage:
 	move $t2, $a0 
 	sll $t2, $t2, 8
 	sw $t2, ($gp)
-	addi $a0, $a0, 1 # pointer for buffer skips a word
+	addi $a0, $a0, 4 # pointer for buffer skips a word
 	addi $a1, $a1, 1 # iterator++
 	addi $gp, $gp, 4 # gp skips a word
 	j showImage 
