@@ -1,4 +1,4 @@
-.include "showImage.asm"
+.include "macros.asm"
 
 .text
 main: 
