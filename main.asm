@@ -1,3 +1,5 @@
+.include "showImage.asm"
+
 .text
 main: 
 	jal openFile
@@ -15,22 +17,19 @@ main:
 	jal loadImage
 	# prepares showImage args
 		# a0: pointer to buffer start
-		# a1: iterator (starts at 0)
-		# a2: rowXcols value (once buffer is a memory array)
+		# a1: rowXcols value (once buffer is a memory array)
 	la $a0, image
-	move $a1, $zero
 	lw $t0, imageRows
 	lw $t1, imageCols
-	mulu $a2, $t0, $t1 # 512 * 512
-	srl $a2, $a2, 2
-	move $t7, $gp
-	jal showImage
-	move $gp, $t7
+	mulu $a1, $t0, $t1 # 512 * 512
+#	li $a1, 1048576
+	showImage($a0, $a1)
 	li $v0, 4
 	la $a0, backtomain
 	syscall
 	li $v0, 10
 	syscall
+	
 
 openFile:
 	# syscall 13 
@@ -138,20 +137,6 @@ loadImage:
 		b loop
 	return:
 		jr $ra
-showImage:
-	# iterates over buffer and save its values to gp in order to show image
-		# a0: pointer to buffer start
-		# a1: iterator (starts at 0)
-		# a2: rowXcols value (once buffer is a memory array)
-	beq $a2, $a1, return_show
-	li $t2, 0xFF0000
-	sw $t2, ($gp)
-	addi $a0, $a0, 4 # pointer for buffer skips a word
-	addi $a1, $a1, 1 # iterator++
-	#addi $gp, $gp, 4 # gp skips a word
-	j showImage
-	return_show:
-		jr $ra
 
 .data
 	imageRows:	.word 512
@@ -161,3 +146,4 @@ showImage:
 	backtomain:	.asciiz "back to main"
 	buffer:		.space 786486
 	image:		.space 1048576 # (4 * words amount)
+	
