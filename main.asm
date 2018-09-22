@@ -1,22 +1,34 @@
 .text
 main: 
 	jal openFile
-	li $v0, 4
-	la $a0, backtomain
-	syscall
 	jal readFile
 	jal closeFile
+	# At this point the register values are:
+		# $s0: file descriptor
+		# $s4: nchars read by readFile
+		# $s6: buffer pointer
+	# prepare loadImage args
+		# a0: pointer to buffer start
+		# a1: image pointer
+		# a2: iterator (starts at 0)
+	# adds 0 to word, once bit map saves in 3-3bytes groups (RGB)
+	jal loadImage
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: iterator (starts at 0)
 		# a2: rowXcols value (once buffer is a memory array)
-	move $a0, $s0
+	la $a0, image
 	move $a1, $zero
 	lw $t0, imageRows
 	lw $t1, imageCols
-	mulu $a2, $t0, $t1
+	mulu $a2, $t0, $t1 # 512 * 512
+	srl $a2, $a2, 2
+	move $t7, $gp
 	jal showImage
-	comeBackMain:
+	move $gp, $t7
+	li $v0, 4
+	la $a0, backtomain
+	syscall
 	li $v0, 10
 	syscall
 
@@ -68,33 +80,84 @@ readFile:
 	# syscall 14
 		# $a0: file descriptor ($s0)
 		# $a1: address buffer
-		# $a2: buffer lenght (512x512 = 262144)
+		# $a2: buffer lenght (512x512*3 = 786432)
 	li $v0, 14
 	move $a0, $s0
 	la $a1, buffer
-	li $a2, 786432
-	syscall
+	li $a2, 786486
+	syscall # readsfile to buffer
+	
+	bgt $v0, 0, fpnull
+		break
+	fpnull:
+	move $s4, $v0 # saves nread char to $s4
+	move $s6, $a1 # saves buffer pointer to $s6
 	jr $ra
 
+loadImage:
+	# a0: pointer to buffer start
+	# a1: image pointer
+	# a2: iterator (starts at 0)
+	# At this point the register values are:
+		# $s0: file descriptor
+		# $s4: nchars read by readFile
+		# $s6: buffer pointer
+	subi $s4, $s4, 54 	# arqbytes-header
+	div $s4, $s4, 3		# $s4: words ammount
+	
+	la $s6, buffer
+	addi $s6, $s6, 54	# header offset
+
+	la $s1, image		# s1 = &imagem
+
+	li $t0, 0		# i = 0	
+	loop:
+		beq $t0, $s4, return
+		
+		lbu $t1, ($s6) # load R byte from buffer
+		addi $s6, $s6, 1
+		sb $t1, ($s1)
+		addi $s1, $s1, 1
+		
+		lbu $t1, ($s6) # load G byte from buffer
+		addi $s6, $s6, 1
+		sb $t1, ($s1)
+		addi $s1, $s1, 1
+				
+		lbu $t1, ($s6) # load B byte from buffer
+		addi $s6, $s6, 1
+		sb $t1, ($s1)
+		addi $s1, $s1, 1
+		
+		sb $zero, ($s1) # writes 00
+		addi $s1, $s1, 1
+		
+		addi $t0, $t0, 1
+		
+		
+		b loop
+	return:
+		jr $ra
 showImage:
 	# iterates over buffer and save its values to gp in order to show image
 		# a0: pointer to buffer start
 		# a1: iterator (starts at 0)
 		# a2: rowXcols value (once buffer is a memory array)
-	slt $t0, $a2, $a0
-	bnez $t0, comeBackMain # if a1 > a2 go back to main where you belong
-	move $t2, $a0 
-	sll $t2, $t2, 8
+	beq $a2, $a1, return_show
+	li $t2, 0xFF0000
 	sw $t2, ($gp)
 	addi $a0, $a0, 4 # pointer for buffer skips a word
 	addi $a1, $a1, 1 # iterator++
-	addi $gp, $gp, 4 # gp skips a word
-	j showImage 
+	#addi $gp, $gp, 4 # gp skips a word
+	j showImage
+	return_show:
+		jr $ra
 
 .data
+	imageRows:	.word 512
+	imageCols:	.word 512
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
-	buffer:		.space 524288
-	imageRows:	.word 512
-	imageCols:	.word 512
+	buffer:		.space 786486
+	image:		.space 1048576 # (4 * words amount)
