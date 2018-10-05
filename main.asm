@@ -1,5 +1,14 @@
 .include "macros.asm"
 
+.data
+	image:		.space 1048576 # (4 * words amount)
+	buffer:		.space 786486
+	imageRows:	.word 512
+	imageCols:	.word 512
+	inFilename:	.asciiz "img.bmp" #defines filename for opening
+	exitMessage:	.asciiz "Something went wrong"
+	backtomain:	.asciiz "back to main"
+
 .text
 main: 
 	jal openFile
@@ -18,12 +27,6 @@ main:
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
-	la $a0, image
-	lw $t0, imageRows
-	lw $t1, imageCols
-	mulu $a1, $t0, $t1 # 512 * 512
-#	li $a1, 1048576
-	showImage($a0, $a1)
 	li $v0, 4
 	la $a0, backtomain
 	syscall
@@ -101,49 +104,43 @@ loadImage:
 		# $s0: file descriptor
 		# $s4: nchars read by readFile
 		# $s6: buffer pointer
-	subi $s4, $s4, 54 	# arqbytes-header
-	div $s4, $s4, 3		# $s4: words ammount
-	
 	la $s6, buffer
 	addi $s6, $s6, 54	# header offset
-
+	
 	la $s1, image		# s1 = &imagem
-
-	li $t0, 0		# i = 0	
+	addi $t0, $s4, -54
+	add $t0, $t0, $s6	# t0 = fim buffer
+	
 	loop:
-		beq $t0, $s4, return
+		sub $t4, $t0, $s6
+		beqz $t4, return
 		
-		lbu $t1, ($s6) # load R byte from buffer
-		addi $s6, $s6, 1
+		lbu $t1, ($t0) # load B byte from buffer
+		addi $t0, $t0, -1
+		lbu $t2, ($t0) # load G byte from buffer
+		addi $t0, $t0, -1
+		lbu $t3, ($t0) # load R byte from buffer
+		addi $t0, $t0, -1
+		
+		
+		
+		sb $zero, ($s1)
+		addi $s1, $s1, 1
+		sb $t3, ($s1)
+		addi $s1, $s1, 1
+
+		sb $t2, ($s1)
+		addi $s1, $s1, 1
+		
 		sb $t1, ($s1)
 		addi $s1, $s1, 1
 		
-		lbu $t1, ($s6) # load G byte from buffer
-		addi $s6, $s6, 1
-		sb $t1, ($s1)
-		addi $s1, $s1, 1
-				
-		lbu $t1, ($s6) # load B byte from buffer
-		addi $s6, $s6, 1
-		sb $t1, ($s1)
-		addi $s1, $s1, 1
 		
-		sb $zero, ($s1) # writes 00
-		addi $s1, $s1, 1
 		
-		addi $t0, $t0, 1
-		
+
 		
 		b loop
-	return:
+	return: #bk
 		jr $ra
 
-.data
-	imageRows:	.word 512
-	imageCols:	.word 512
-	inFilename:	.asciiz "img.bmp" #defines filename for opening
-	exitMessage:	.asciiz "Something went wrong"
-	backtomain:	.asciiz "back to main"
-	buffer:		.space 786486
-	image:		.space 1048576 # (4 * words amount)
 	
