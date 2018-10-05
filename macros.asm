@@ -70,28 +70,32 @@ loop2:#loop de impressão
 	addi $t9,$zero,1000
 loop2:
   	lw $t4, ($t2) # move from space to register
+
+	lb $t0 0($t4) 
+	mul $t0,$t0,299    #  
+	divu $t0,$t9       # R -> Grayscale
+	sb $t0, 0($t4)     #   
+	
+	lb $t0 1($t4)     
+	mul $t0,$t0,587   #
+	divu $t0,$t9      # G -> Grayscale
+	sb $t0, 1($t4)    #
+	
+	lb $t0 2($t4)     
+	mul $t0,$t0,114   #
+	divu $t0,$t9      # B -> Grayscale
+	sb $t0, 2($t4)    #
+	
 # 	slt $t5,$t4,$t7 #compara a cor de t4 com o tom médio de cinza 
 # 	beq $t5,1,preto 
 # branco: addi $t4,$zero,0xffffffff	
 #	 j continua
 # preto:
 # 	addi $t4,$zero,0
-# continua:
-	lw $t0 0($t4) 
-	mul $t0,$t0,299
-	div $t0,$t9
-	sw $t0, 0($t4)
-	lw $t0 1($t4) 
-	mul $t0,$t0,587
-	div $t0,$t9
-	sw $t0, 1($t4)
-	lw $t0 2($t4) 
-	mul $t0,$t0,114
-	div $t0,$t9
-	sw $t0, 2($t4)
+# continua:	
+	
 	sw $t4, ($gp)
 	addi $gp, $gp, 4
 	addi $t2,$t2,4
-	#bne $t2,%image_pointer,loop
 	bne $t2, $t3, loop2
 .end_macro
