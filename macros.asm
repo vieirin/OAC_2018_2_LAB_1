@@ -9,7 +9,7 @@
     	addi $t6, $t6, 54	# header offset
 	move $t8,%image_pointer
 	addi $t0, %buffersize, -54
-	add $t0, $t0, $t6	# t0 = fim buffer
+	add $t0, $t0, $t6	# t0 = buffer's end 
 	
 	loop:
 		sub $t4, $t0, $t6
@@ -45,8 +45,6 @@ internalLoop:
 		add $t7,$t4,$zero
 		sw $t6, 0($t1)
 		sw $t7 ,0($t3)
-		#addi $t2,$0,0x00ff0000
-		#sw $t2,0($t1)
 		addi $t1, $t1,4
 		addi $t3,$t3,-4
 		addi $t9,$t9,-1
@@ -74,7 +72,6 @@ internalLoop:
 	
 loop2:
   	
-
 	lbu $t0 0($t2)		#
 	lbu $t5,1($t2)		#
 	lbu $t6,2($t2)		#
