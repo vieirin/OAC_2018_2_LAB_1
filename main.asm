@@ -23,7 +23,8 @@ main:
 		# a1: image pointer
 		# a2: iterator (starts at 0)
 	# adds 0 to word, once bit map saves in 3-3bytes groups (RGB)
-	jal loadImage
+	la $a0, image
+	loadImage($s6, $a0, $s4)
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
@@ -95,45 +96,5 @@ readFile:
 	move $s4, $v0 # saves nread char to $s4
 	move $s6, $a1 # saves buffer pointer to $s6
 	jr $ra
-
-loadImage:
-	# a0: pointer to buffer start
-	# a1: image pointer
-	# a2: iterator (starts at 0)
-	# At this point the register values are:
-		# $s0: file descriptor
-		# $s4: nchars read by readFile
-		# $s6: buffer pointer
-	la $s6, buffer
-	addi $s6, $s6, 54	# header offset
-	
-	la $s1, image		# s1 = &imagem
-	addi $t0, $s4, -54
-	add $t0, $t0, $s6	# t0 = fim buffer
-	
-	loop:
-		sub $t4, $t0, $s6
-		beqz $t4, return
-		
-		lbu $t1, ($t0) # load B byte from buffer
-		addi $t0, $t0, -1
-		lbu $t2, ($t0) # load G byte from buffer
-		addi $t0, $t0, -1
-		lbu $t3, ($t0) # load R byte from buffer
-		addi $t0, $t0, -1
-		sll $t3,$t3,8
-		sll $t2,$t2,16
-		or $t8,$t2,$t3
-		or $t8,$t8,$t1
-		sw $t8, ($s1)
-		addi $s1,$s1,4
-	
-	
-	
-
-		
-		b loop
-	return: #bk
-		jr $ra
 
 	
