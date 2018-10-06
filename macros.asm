@@ -101,15 +101,15 @@ continue:
 
 .macro Blur3 (%image_pointer, %size)
 	move $t0, %image_pointer
-	addi $t0,$t0,2052  # Inicío do blur
-	li $t2,3   #Tamanho do Kernel
+	addi $t0,$t0,2052  # Blur's Beggining
+	li $t2,3   #Kernel size
 	li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
 	li $t1,0
 	
-	li $t8, 516        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
-	li $t9,510	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t8, 516        #Number of lines 
+	li $t9,510	#Nunber of columns 
 	move $t7,$t0
 	li $t3,3
 	j loopKernel1
@@ -122,7 +122,7 @@ loopBlur:
 	
 	j loopKernel1
 loop:
-	li $t3,3 #Númeor do kernel
+	li $t3,3 #Kernel size
 	
 	divu $t4,$t4,$t3
 	divu $t4,$t4,$t3
@@ -147,14 +147,14 @@ loop:
 	
 	
 	addi $t0,$t0,4
-	addi $t7,$t0,-2052 #Pixel 0x0 na matrix 3x3
+	addi $t7,$t0,-2052 #Pixel 0x0 of 3x3 Matrix
 	addi $t9,$t9,-1
 	bne $t9,0 loopKernel1
 	
 	j loopBlur
 	
 loopKernel1:	
-	li $t2,3 #número do kernel
+	li $t2,3 #Kernel size
 	
 loopKernel2:
 	lbu $t1,0($t7)
@@ -168,13 +168,13 @@ loopKernel2:
 	lbu $t1,0($t7)
 	addu $t6,$t6,$t1
 	
-	addi $t7,$t7,2 #usado para pular o zero e ir direto pro próximo R
+	addi $t7,$t7,2 #Jump byte zero
 	addi $t2,$t2,-1
 	bgtz $t2 loopKernel2
 	
 	addi $t3,$t3,-1
 	beqz $t3, loop
-	addi $t7,$t7,2040 #pula para a linha de baixo para a primeira posição
+	addi $t7,$t7,2040 #jump for next line
 	j loopKernel1
 
 
@@ -185,28 +185,28 @@ exit:
 
 .macro Blur5 (%image_pointer, %size)
 	move $t0, %image_pointer
-	addi $t0,$t0,4104  # Inicío do blur
-	li $t2,5   #Tamanho do Kernel
+	addi $t0,$t0,4104  # Blur's Beggining
+	li $t2,5   #Kernel size
 	li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
 	li $t1,0
 	
-	li $t8, 525        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
-	li $t9,496	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t8, 508        #Number of lines
+	li $t9,508	#Nunber of columns 
 	move $t7,$t0
 	li $t3,5
 	j loopKernel1
 loopBlur:	
-	li $t9,496 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t9,508 #Nunber of columns 
 	
-	addi $t0,$t0,8
+	addi $t0,$t0,16
 	addi $t8,$t8,-1
 	beqz $t8,exit
 	
 	j loopKernel1
 loop:
-	li $t3,5 #Númeor do kernel
+	li $t3,5 #Kernel size
 	
 	divu $t4,$t4,$t3
 	divu $t4,$t4,$t3
@@ -231,14 +231,14 @@ loop:
 	
 	
 	addi $t0,$t0,4
-	addi $t7,$t0,-4104 #Pixel 0x0 na matrix 3x3
+	addi $t7,$t0,-4104 #Pixel 0x0 of 5x5 Matrix
 	addi $t9,$t9,-1
-	bne $t9,0 loopKernel1
+	bgtz $t9 loopKernel1
 	
 	j loopBlur
 	
 loopKernel1:	
-	li $t2,5 #número do kernel
+	li $t2,5 #Kernel size
 	
 loopKernel2:
 	lbu $t1,0($t7)
@@ -252,13 +252,13 @@ loopKernel2:
 	lbu $t1,0($t7)
 	addu $t6,$t6,$t1
 	
-	addi $t7,$t7,2 #usado para pular o zero e ir direto pro próximo R
+	addi $t7,$t7,2 #Jump byte zero
 	addi $t2,$t2,-1
 	bgtz $t2 loopKernel2
 	
 	addi $t3,$t3,-1
 	beqz $t3, loop
-	addi $t7,$t7,2032 #pula para a linha de baixo para a primeira posição
+	addi $t7,$t7,2032 #jump for next line
 	j loopKernel1
 
 
@@ -269,28 +269,28 @@ exit:
 
 .macro Blur7 (%image_pointer, %size)
 	move $t0, %image_pointer
-	addi $t0,$t0,6156  # Inicío do blur
-	li $t2,7   #Tamanho do Kernel
+	addi $t0,$t0,6156  # Blur's Beggining
+	li $t2,7   #Kernel size
 	li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
 	li $t1,0
 	
-	li $t8, 530       #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
-	li $t9,488	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t8, 506       #Number of lines 
+	li $t9,506	#Nunber of columns 
 	move $t7,$t0
 	li $t3,7
 	j loopKernel1
 loopBlur:	
-	li $t9,488 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t9,506
 	
-	addi $t0,$t0,8
+	addi $t0,$t0,24
 	addi $t8,$t8,-1
 	beqz $t8,exit
 	
 	j loopKernel1
 loop:
-	li $t3,7 #Númeor do kernel
+	li $t3,7 #Kernel size
 	
 	divu $t4,$t4,$t3
 	divu $t4,$t4,$t3
@@ -315,14 +315,13 @@ loop:
 	
 	
 	addi $t0,$t0,4
-	addi $t7,$t0,-6156 #Pixel 0x0 na matrix 3x3
+	addi $t7,$t0,-6156 #Pixel 0x0 of 7x7 Matrix
 	addi $t9,$t9,-1
-	bne $t9,0 loopKernel1
-	
+	bgtz $t9 loopKernel1
 	j loopBlur
 	
 loopKernel1:	
-	li $t2,7 #número do kernel
+	li $t2,7 #Kernel size
 	
 loopKernel2:
 	lbu $t1,0($t7)
@@ -336,13 +335,13 @@ loopKernel2:
 	lbu $t1,0($t7)
 	addu $t6,$t6,$t1
 	
-	addi $t7,$t7,2 #usado para pular o zero e ir direto pro próximo R
+	addi $t7,$t7,2 #Jump byte zero
 	addi $t2,$t2,-1
 	bgtz $t2 loopKernel2
 	
 	addi $t3,$t3,-1
 	beqz $t3, loop
-	addi $t7,$t7,2024 #pula para a linha de baixo para a primeira posição
+	addi $t7,$t7,2024 #jump for next line
 	j loopKernel1
 
 

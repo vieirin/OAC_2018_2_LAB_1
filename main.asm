@@ -40,7 +40,7 @@ main:
 	sll $s2,$s2,2
 	li $s3, 5
 	loadImage($s6, $a0, $s4)
-	Blur5($a0,$s2)
+	Blur7($a0,$s2)
 	#showBlackWhite($a0,$s2,$s3)
 	# prepares showImage args
 		# a0: pointer to buffer start
