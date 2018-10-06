@@ -123,8 +123,8 @@ loadImage:
 		addi $t0, $t0, -1
 		sll $t3,$t3,8
 		sll $t2,$t2,16
-		add $t8,$t2,$t3
-		add $t8,$t8,$t1
+		or $t8,$t2,$t3
+		or $t8,$t8,$t1
 		sw $t8, ($s1)
 		addi $s1,$s1,4
 	
