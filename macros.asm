@@ -4,11 +4,11 @@
 	syscall
 .end_macro
 
-.macro loadImage(%buffer, %image_pointer, %size)
+.macro loadImage(%buffer, %image_pointer, %buffersize)
     	move $t6, %buffer
     	addi $t6, $t6, 54	# header offset
 	move $t8,%image_pointer
-	addi $t0, %size, -54
+	addi $t0, %buffersize, -54
 	add $t0, $t0, $t6	# t0 = fim buffer
 	
 	loop:
@@ -64,7 +64,7 @@ internalLoop:
 	li $t0,10
 	addi $t4,%intensity,2
 	move $t3, %size
-	sll $t3,$t3,2
+
 	add $t3,%image_pointer,$t3 #End
 	move $t2,%image_pointer    #Beginning
 	addi $t7,$zero,0x007f7f7f  #Threshold
@@ -98,7 +98,8 @@ continue:
 	
 	sw $t4, ($t2)
 	addi $t2,$t2,4
-	bne $t2, $t3, loop2
+	ble $t2, $t3, loop2
+	
 .end_macro
 
 
