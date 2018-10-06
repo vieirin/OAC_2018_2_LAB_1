@@ -110,7 +110,9 @@ continue:
 	
 	li $t8, 516        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
 	li $t9,510	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
-	j loop
+	move $t7,$t0
+	li $t3,3
+	j loopKernel1
 loopBlur:	
 	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	
@@ -190,9 +192,11 @@ exit:
 	li $t6, 0  # B
 	li $t1,0
 	
-	li $t8, 520        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
+	li $t8, 525        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
 	li $t9,496	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
-	j loop
+	move $t7,$t0
+	li $t3,5
+	j loopKernel1
 loopBlur:	
 	li $t9,496 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	
@@ -274,7 +278,9 @@ exit:
 	
 	li $t8, 530       #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
 	li $t9,488	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
-	j loop
+	move $t7,$t0
+	li $t3,7
+	j loopKernel1
 loopBlur:	
 	li $t9,488 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	
