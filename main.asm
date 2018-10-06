@@ -121,22 +121,15 @@ loadImage:
 		addi $t0, $t0, -1
 		lbu $t3, ($t0) # load R byte from buffer
 		addi $t0, $t0, -1
-		
-		
-		
-		sb $zero, ($s1)
-		addi $s1, $s1, 1
-		sb $t3, ($s1)
-		addi $s1, $s1, 1
-
-		sb $t2, ($s1)
-		addi $s1, $s1, 1
-		
-		sb $t1, ($s1)
-		addi $s1, $s1, 1
-		
-		
-		
+		sll $t3,$t3,8
+		sll $t2,$t2,16
+		add $t8,$t2,$t3
+		add $t8,$t8,$t1
+		sw $t8, ($s1)
+		addi $s1,$s1,4
+	
+	
+	
 
 		
 		b loop
