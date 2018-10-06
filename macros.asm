@@ -132,8 +132,8 @@ loop:
 	divu $t6,$t6,$t3
 	divu $t6,$t6,$t3
 	
-	sll $t5,$t5,4
-	sll $t6,$t6,8
+	sll $t5,$t5,8
+	sll $t6,$t6,16
 	
 	or $t4,$t4,$t5
 	or $t4,$t4,$t6
