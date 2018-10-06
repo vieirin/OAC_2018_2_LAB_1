@@ -99,7 +99,7 @@ continue:
 	
 .end_macro
 
-.macro Blur2 (%image_pointer, %size,%intensity)
+.macro Blur3 (%image_pointer, %size)
 	move $t0, %image_pointer
 	addi $t0,$t0,2052  # Inicío do blur
 	li $t2,3   #Tamanho do Kernel
@@ -181,130 +181,166 @@ exit:
 
 .end_macro 
 
-.macro Blur (%image_pointer, %size,%intensity)
+.macro Blur5 (%image_pointer, %size)
 	move $t0, %image_pointer
-	addi $t0,$t0,2052  # Inicío do blur
-	li $t8, 516        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
-	li $t3,9    # Divisor da matriz sendo 9,25 ou 49
+	addi $t0,$t0,4104  # Inicío do blur
+	li $t2,5   #Tamanho do Kernel
 	li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
 	li $t1,0
+	
+	li $t8, 520        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
+	li $t9,496	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	j loop
 loopBlur:	
-	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t9,496 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	
-loop:	
-		
-	lbu $t1,-2052($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,-2051($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,-2050($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
+	addi $t0,$t0,8
+	addi $t8,$t8,-1
+	beqz $t8,exit
 	
+	j loopKernel1
+loop:
+	li $t3,5 #Númeor do kernel
 	
-	lbu $t1,-2048($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,-2047($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,-2046($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
+	divu $t4,$t4,$t3
+	divu $t4,$t4,$t3
 	
-	lbu $t1,-2044($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,-2043($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,-2042($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
+	divu $t5,$t5,$t3
+	divu $t5,$t5,$t3
 	
-	lbu $t1,-4($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,-3($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,-2($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
+	divu $t6,$t6,$t3
+	divu $t6,$t6,$t3
 	
-	lbu $t1,0($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,1($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,2($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
+	sll $t5,$t5,8
+	sll $t6,$t6,16
 	
-	lbu $t1,4($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,5($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,6($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
+	or $t4,$t4,$t5
+	or $t4,$t4,$t6
 	
-	lbu $t1,2044($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,2045($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,2046($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
-	
-	lbu $t1,2048($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,2049($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,2050($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
-	
-	lbu $t1,2052($t0)
-	divu $t1,$t1,$t3
-	addu $t4,$t4,$t1
-	lbu $t1,2053($t0)
-	divu $t1,$t1,$t3
-	addu $t5,$t5,$t1
-	lbu $t1,2054($t0)
-	divu $t1,$t1,$t3
-	addu $t6,$t6,$t1
-	
-	mulu $t4,$t4,$t3
-	mulu $t5,$t5,$t3
-	mulu $t6,$t6,$t3
-	sb $t4, 0($t0)
-	sb $t5, 1($t0)
-	sb $t6, 2($t0)
+	sw $t4,0($t0)
         
         li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
-
+	
+	
 	addi $t0,$t0,4
+	addi $t7,$t0,-4104 #Pixel 0x0 na matrix 3x3
 	addi $t9,$t9,-1
-	bne $t9,0 loop
+	bne $t9,0 loopKernel1
+	
+	j loopBlur
+	
+loopKernel1:	
+	li $t2,5 #número do kernel
+	
+loopKernel2:
+	lbu $t1,0($t7)
+	addu $t4,$t4,$t1
+	
+	addi $t7,$t7,1
+	lbu $t1,0($t7)
+	addu $t5,$t5,$t1
+	
+	addi $t7,$t7,1
+	lbu $t1,0($t7)
+	addu $t6,$t6,$t1
+	
+	addi $t7,$t7,2 #usado para pular o zero e ir direto pro próximo R
+	addi $t2,$t2,-1
+	bgtz $t2 loopKernel2
+	
+	addi $t3,$t3,-1
+	beqz $t3, loop
+	addi $t7,$t7,2032 #pula para a linha de baixo para a primeira posição
+	j loopKernel1
+
+
+exit:	
+
+
+.end_macro 
+
+.macro Blur7 (%image_pointer, %size)
+	move $t0, %image_pointer
+	addi $t0,$t0,6156  # Inicío do blur
+	li $t2,7   #Tamanho do Kernel
+	li $t4, 0  # R 
+	li $t5, 0  # G
+	li $t6, 0  # B
+	li $t1,0
+	
+	li $t8, 530       #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
+	li $t9,488	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	j loop
+loopBlur:	
+	li $t9,488 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	
 	addi $t0,$t0,8
 	addi $t8,$t8,-1
-	bne $t8,0,loopBlur
+	beqz $t8,exit
+	
+	j loopKernel1
+loop:
+	li $t3,7 #Númeor do kernel
+	
+	divu $t4,$t4,$t3
+	divu $t4,$t4,$t3
+	
+	divu $t5,$t5,$t3
+	divu $t5,$t5,$t3
+	
+	divu $t6,$t6,$t3
+	divu $t6,$t6,$t3
+	
+	sll $t5,$t5,8
+	sll $t6,$t6,16
+	
+	or $t4,$t4,$t5
+	or $t4,$t4,$t6
+	
+	sw $t4,0($t0)
+        
+        li $t4, 0  # R 
+	li $t5, 0  # G
+	li $t6, 0  # B
+	
+	
+	addi $t0,$t0,4
+	addi $t7,$t0,-6156 #Pixel 0x0 na matrix 3x3
+	addi $t9,$t9,-1
+	bne $t9,0 loopKernel1
+	
+	j loopBlur
+	
+loopKernel1:	
+	li $t2,7 #número do kernel
+	
+loopKernel2:
+	lbu $t1,0($t7)
+	addu $t4,$t4,$t1
+	
+	addi $t7,$t7,1
+	lbu $t1,0($t7)
+	addu $t5,$t5,$t1
+	
+	addi $t7,$t7,1
+	lbu $t1,0($t7)
+	addu $t6,$t6,$t1
+	
+	addi $t7,$t7,2 #usado para pular o zero e ir direto pro próximo R
+	addi $t2,$t2,-1
+	bgtz $t2 loopKernel2
+	
+	addi $t3,$t3,-1
+	beqz $t3, loop
+	addi $t7,$t7,2024 #pula para a linha de baixo para a primeira posição
+	j loopKernel1
 
-.end_macro
+
+exit:	
 
 
+.end_macro 
