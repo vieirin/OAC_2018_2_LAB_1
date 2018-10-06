@@ -1,5 +1,14 @@
 .include "macros.asm"
 
+.data
+	image:		.space 1048576 # (4 * words amount)
+	buffer:		.space 786486
+	imageRows:	.word 512
+	imageCols:	.word 512
+	inFilename:	.asciiz "img.bmp" #defines filename for opening
+	exitMessage:	.asciiz "Something went wrong"
+	backtomain:	.asciiz "back to main"
+
 .text
 main: 
 	jal openFile
@@ -14,16 +23,11 @@ main:
 		# a1: image pointer
 		# a2: iterator (starts at 0)
 	# adds 0 to word, once bit map saves in 3-3bytes groups (RGB)
-	jal loadImage
+	la $a0, image
+	loadImage($s6, $a0, $s4)
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
-	la $a0, image
-	lw $t0, imageRows
-	lw $t1, imageCols
-	mulu $a1, $t0, $t1 # 512 * 512
-#	li $a1, 1048576
-	showImage($a0, $a1)
 	li $v0, 4
 	la $a0, backtomain
 	syscall
@@ -93,57 +97,4 @@ readFile:
 	move $s6, $a1 # saves buffer pointer to $s6
 	jr $ra
 
-loadImage:
-	# a0: pointer to buffer start
-	# a1: image pointer
-	# a2: iterator (starts at 0)
-	# At this point the register values are:
-		# $s0: file descriptor
-		# $s4: nchars read by readFile
-		# $s6: buffer pointer
-	subi $s4, $s4, 54 	# arqbytes-header
-	div $s4, $s4, 3		# $s4: words ammount
-	
-	la $s6, buffer
-	addi $s6, $s6, 54	# header offset
-
-	la $s1, image		# s1 = &imagem
-
-	li $t0, 0		# i = 0	
-	loop:
-		beq $t0, $s4, return
-		
-		lbu $t1, ($s6) # load R byte from buffer
-		addi $s6, $s6, 1
-		sb $t1, ($s1)
-		addi $s1, $s1, 1
-		
-		lbu $t1, ($s6) # load G byte from buffer
-		addi $s6, $s6, 1
-		sb $t1, ($s1)
-		addi $s1, $s1, 1
-				
-		lbu $t1, ($s6) # load B byte from buffer
-		addi $s6, $s6, 1
-		sb $t1, ($s1)
-		addi $s1, $s1, 1
-		
-		sb $zero, ($s1) # writes 00
-		addi $s1, $s1, 1
-		
-		addi $t0, $t0, 1
-		
-		
-		b loop
-	return:
-		jr $ra
-
-.data
-	imageRows:	.word 512
-	imageCols:	.word 512
-	inFilename:	.asciiz "img.bmp" #defines filename for opening
-	exitMessage:	.asciiz "Something went wrong"
-	backtomain:	.asciiz "back to main"
-	buffer:		.space 786486
-	image:		.space 1048576 # (4 * words amount)
 	
