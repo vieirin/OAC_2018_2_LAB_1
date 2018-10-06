@@ -103,14 +103,13 @@ continue:
 	move $t0, %image_pointer
 	addi $t0,$t0,2052  # Inicío do blur
 	li $t2,3   #Tamanho do Kernel
-	li $t3,9   # Divisor da matriz sendo 9,25 ou 49
 	li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
 	li $t1,0
 	
 	li $t8, 516        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
-	li $t9,510
+	li $t9,510	#Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	j loop
 loopBlur:	
 	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
@@ -121,7 +120,7 @@ loopBlur:
 	
 	j loopKernel1
 loop:
-	li $t3,3
+	li $t3,3 #Númeor do kernel
 	
 	divu $t4,$t4,$t3
 	divu $t4,$t4,$t3
@@ -153,7 +152,7 @@ loop:
 	j loopBlur
 	
 loopKernel1:	
-	li $t2,3
+	li $t2,3 #número do kernel
 	
 loopKernel2:
 	lbu $t1,0($t7)
