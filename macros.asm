@@ -101,6 +101,122 @@ continue:
 
 
 
+.macro Blur (%image_pointer, %size,%intensity)
+	move $t0, %image_pointer
+	addi $t0,$t0,2052  # Inicío do blur
+	li $t8, 516        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
+	li $t3,9    # Divisor da matriz sendo 9,25 ou 49
+	li $t4, 0  # R 
+	li $t5, 0  # G
+	li $t6, 0  # B
+loopBlur:	
+	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+loop:	
+		
+	lbu $t1,-2052($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,-2051($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,-2050($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	
+	lbu $t1,-2048($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,-2047($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,-2046($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,-2044($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,-2043($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,-2042($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,-4($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,-3($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,-2($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,0($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,1($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,2($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,4($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,5($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,6($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,2044($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,2045($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,2046($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,2048($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,2049($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,2050($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	lbu $t1,2052($t0)
+	divu $t1,$t1,$t3
+	addu $t4,$t4,$t1
+	lbu $t1,2053($t0)
+	divu $t1,$t1,$t3
+	addu $t5,$t5,$t1
+	lbu $t1,2054($t0)
+	divu $t1,$t1,$t3
+	addu $t6,$t6,$t1
+	
+	sb $t4, 0($t0)
+	sb $t5, 1($t0)
+	sb $t6, 2($t0)
+ 
 
+	addi $t0,$t0,4
+	addi $t9,$t9,-1
+	bne $t9,0 loop
+	
+	addi $t0,$t0,8
+	addi $t8,$t8,-1
+	bne $t8,0,loopBlur
+
+.end_macro
 
 

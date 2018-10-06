@@ -40,11 +40,12 @@ main:
 	sll $s2,$s2,2
 	li $s3, 5
 	loadImage($s6, $a0, $s4)
-	showBlackWhite($a0,$s2,$s3)
+	Blur($a0,$s2,$s3)
+	#showBlackWhite($a0,$s2,$s3)
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
-	menu()
+	#menu()
 	li $v0, 4
 	la $a0, backtomain
 	syscall
