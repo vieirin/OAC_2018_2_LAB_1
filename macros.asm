@@ -99,7 +99,88 @@ continue:
 	
 .end_macro
 
+.macro Blur2 (%image_pointer, %size,%intensity)
+	move $t0, %image_pointer
+	addi $t0,$t0,2052  # Inicío do blur
+	li $t2,3   #Tamanho do Kernel
+	li $t3,9   # Divisor da matriz sendo 9,25 ou 49
+	li $t4, 0  # R 
+	li $t5, 0  # G
+	li $t6, 0  # B
+	li $t1,0
+	
+	li $t8, 516        #Número de linhas. Tive que modificar essa variável para se adequar ao loop (acho que o valor será 512 +4 +8 +12 para 3x3 5x5 
+	li $t9,510
+	j loop
+loopBlur:	
+	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	
+	addi $t0,$t0,8
+	addi $t8,$t8,-1
+	beqz $t8,exit
+	
+	j loopKernel1
+loop:
+	li $t3,3
+	
+	divu $t4,$t4,$t3
+	divu $t4,$t4,$t3
+	
+	divu $t5,$t5,$t3
+	divu $t5,$t5,$t3
+	
+	divu $t6,$t6,$t3
+	divu $t6,$t6,$t3
+	
+	sll $t5,$t5,4
+	sll $t6,$t6,8
+	
+	or $t4,$t4,$t5
+	or $t4,$t4,$t6
+	
+	sw $t4,0($t0)
+        
+        li $t4, 0  # R 
+	li $t5, 0  # G
+	li $t6, 0  # B
+	
+	
+	addi $t0,$t0,4
+	addi $t7,$t0,-2052 #Pixel 0x0 na matrix 3x3
+	addi $t9,$t9,-1
+	bne $t9,0 loopKernel1
+	
+	j loopBlur
+	
+loopKernel1:	
+	li $t2,3
+	
+loopKernel2:
+	lbu $t1,0($t7)
+	addu $t4,$t4,$t1
+	
+	addi $t7,$t7,1
+	lbu $t1,0($t7)
+	addu $t5,$t5,$t1
+	
+	addi $t7,$t7,1
+	lbu $t1,0($t7)
+	addu $t6,$t6,$t1
+	
+	addi $t7,$t7,2 #usado para pular o zero e ir direto pro próximo R
+	addi $t2,$t2,-1
+	bgtz $t2 loopKernel2
+	
+	addi $t3,$t3,-1
+	beqz $t3, loop
+	addi $t7,$t7,2040 #pula para a linha de baixo para a primeira posição
+	j loopKernel1
 
+
+exit:	
+
+
+.end_macro 
 
 .macro Blur (%image_pointer, %size,%intensity)
 	move $t0, %image_pointer
@@ -109,8 +190,10 @@ continue:
 	li $t4, 0  # R 
 	li $t5, 0  # G
 	li $t6, 0  # B
+	li $t1,0
 loopBlur:	
 	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	
 loop:	
 		
 	lbu $t1,-2052($t0)
@@ -204,10 +287,16 @@ loop:
 	divu $t1,$t1,$t3
 	addu $t6,$t6,$t1
 	
+	mulu $t4,$t4,$t3
+	mulu $t5,$t5,$t3
+	mulu $t6,$t6,$t3
 	sb $t4, 0($t0)
 	sb $t5, 1($t0)
 	sb $t6, 2($t0)
- 
+        
+        li $t4, 0  # R 
+	li $t5, 0  # G
+	li $t6, 0  # B
 
 	addi $t0,$t0,4
 	addi $t9,$t9,-1
