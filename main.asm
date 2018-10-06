@@ -1,6 +1,7 @@
 .globl exitMessage
 .include "macros.asm"
 .include "fileops.asm"
+
 .data
 	image:		.space 1048576 # (4 * words amount)
 	buffer:		.space 786486
@@ -9,6 +10,8 @@
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
+
+.include "menuzin.asm"
 
 .text
 main: 
@@ -41,6 +44,7 @@ main:
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
+	menu()
 	li $v0, 4
 	la $a0, backtomain
 	syscall
