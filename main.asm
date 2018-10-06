@@ -24,7 +24,9 @@ main:
 		# a2: iterator (starts at 0)
 	# adds 0 to word, once bit map saves in 3-3bytes groups (RGB)
 	la $a0, image
+	li $s3, 10
 	loadImage($s6, $a0, $s4)
+	showBlackWhite($a0,$s4,$s3)
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
