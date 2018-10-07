@@ -17,8 +17,8 @@
 		srl $t8, $t8, 4
 		srl $t7, $t7, 4
 		srl $t6, $t6, 4
-		sll $t6,$t6,8
-		sll $t7,$t7,16
+		sll $t7, $t7, 8
+		sll $t8, $t8, 16
 		or $t6, $t6, $t7
 		or $t6, $t6, $t8
 		sw $t6, 0($t0)
@@ -29,7 +29,7 @@
 		move $t7, $zero
 		move $t8, $zero
 		bne $t0, 510, row
-		add $t0, $t0, 4 # if last pixel jump two pixels ahead
+		add $t0, $t0, 12 # if last pixel jump two pixels ahead
 		row:
 			li $t2, -1                   # j = -1
 			addi $t1, $t1, 1             # i++
@@ -46,26 +46,29 @@
 			lbu $t4, ($t3)
 			mtc1 $t4, $f3
 			cvt.s.w $f3, $f3
-			mul.s $f3, $f3, $f0
+			mul.s $f3, $f3, $f5
 			cvt.w.s $f3, $f3
 			mfc1 $t4, $f3
 			addu $t6, $t6, $t4
+			addi $t3, $t3, 1
 			
 			lbu $t4, ($t3)
 			mtc1 $t4, $f3
 			cvt.s.w $f3, $f3
-			mul.s $f3, $f3, $f0
+			mul.s $f3, $f3, $f5
 			cvt.w.s $f3, $f3
 			mfc1 $t4, $f3
 			addu $t7, $t7, $t4
+			addi $t3, $t3, 1
 			
 			lbu $t4, ($t3)
 			mtc1 $t4, $f3
 			cvt.s.w $f3, $f3
-			mul.s $f3, $f3, $f0
+			mul.s $f3, $f3, $f5
 			cvt.w.s $f3, $f3
 			mfc1 $t4, $f3
 			addu $t8, $t8, $t4
+			addi $t3, $t3, 2
 			
 			addi $t2, $t2, 1
 			ble $t2, 2, col 
@@ -119,20 +122,20 @@
 .end_macro
 
 .macro getKernelValue(%x, %y)
-	addi $t2, $t2, 1 #due to logic at above function we need to sum j up to 1
+	addi $t9, %y, 1 #due to logic at above function we need to sum j up to 1
 	bnez %x, xNotZero
-		beqz %y, returnF0
-		beq %y, 1, returnF1
-		beq %y, 2, returnF2
+		beqz $t9, returnF0
+		beq $t9, 1, returnF1
+		beq $t9, 2, returnF2
 	xNotZero:
-		bne %x, 1, xNotOne
-			beqz %y, returnF1
-			beq %y, 1, returnF4
-			beq %y, 2, returnF2
+		bne $t9, 1, xNotOne
+			beqz $t9, returnF1
+			beq $t9, 1, returnF4
+			beq $t9, 2, returnF2
 	xNotOne:
-		beqz %y, returnF0
-		beq %y, 1, returnF1
-		beq %y, 2, returnF2
+		beqz $t9, returnF0
+		beq $t9, 1, returnF1
+		beq $t9, 2, returnF2
 	
 	
 	returnF0: mov.s $f5, $f0
