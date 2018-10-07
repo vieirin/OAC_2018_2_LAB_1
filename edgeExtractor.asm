@@ -204,9 +204,9 @@
 .end_macro
 
 .macro convertScaleAbs(%component)
-	sll %component, %component, 1
-	slt $t9, $zero, %component
-	bnez $t9, return
+	srl %component, %component, 2
+	slt $t9, %component, $zero
+	beqz $t9, return
 		li $a3, -1
 		mul $v0, %component, $a3
 		j exit
