@@ -113,7 +113,8 @@
 	save:
 		la $a0,image
 		la $a1,buffer
-		
+		addi $a1,$a1, 786483
+		org_buffer($a0,$a1)
 		file_open:
    		 li $v0, 13
   		  la $a0, filename
