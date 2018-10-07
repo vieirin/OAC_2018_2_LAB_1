@@ -49,4 +49,30 @@
 	fpnull:
 .end_macro
 
+.macro org_buffer(%ip,%bp)
+	loop:
+	li $t1, 0
+	addi %bp,%bp,54
+	lbu $t0, 0(%ip)
+	sb $t0, 0(%bp)
+	addi %bp, %bp, 1
+	addi %ip, %ip, 1
+	
+	lbu $t0, 0(%ip)
+	sb $t0, 0(%bp)
+	addi %bp, %bp, 1
+	addi %ip, %ip, 1
+	
+	lbu $t0, 0(%ip)
+	sb $t0, 0(%bp)
+	addi %bp, %bp, 1
+	addi %ip, %ip, 2
+	
+	addi $t1,$t1,3
+	beq $t1,786486,end
+	j loop
+	end:
+.end_macro
+	
+
 	

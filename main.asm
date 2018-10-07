@@ -4,17 +4,18 @@
 
 .data
 	image:		.space 1048576 # (4 * words amount)
-	buffer:		.space 786486
 	imageRows:	.word 512
 	imageCols:	.word 512
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
-	mainmenu: .asciiz "selecione uma operacao:\n1)blur\n2)edge extractor\n3)binarizacao\n4)exit\n" 
+	mainmenu: .asciiz "selecione uma operacao:\n1)blur\n2)edge extractor\n3)binarizacao\n4)exit\n5)save\n" 
 	errormain: .asciiz "opcao invalida, selecione uma opcao listada."
 	kernelmenu: .asciiz "selecione o tamanho do kernel:\n1)3x3\n2)5x5\n3) 7x7\n"
 	binamenu: .asciiz "escolha uma intensidade de 1 a 10:\n"
-
+	filename: .asciiz "saida.bmp"
+	buffer:		.space 786486
+	bufferend: .space 2
 .macro menu(%image_pointer,%size)
 	move $t0, %image_pointer
 	start:
@@ -31,6 +32,7 @@
 	beq $v0, 2, edgem #if 2 is chosen, go to edge extractor menu
 	beq $v0, 3, binam #if 3 is chosen, go to binary threshold menu
 	beq $v0, 4, exit #if 4 is chosen, exit program
+	beq $v0, 5, save #if 5 is chose, save file
 	#if the user types any other value, a error message is printed
 	addi $v0, $zero, 4 #loads v0 for print syscall
 	la $a0, errormain #error message adress
@@ -107,7 +109,30 @@
 		move $a0, $t0
 		showBlackWhite ($a0, %size,$v0) #bitrfgoojapsodODS JOSJD 
 		move $t0, $a0
-
+		j start
+	save:
+		la $a0,image
+		la $a1,buffer
+		
+		file_open:
+   		 li $v0, 13
+  		  la $a0, filename
+   		 li $a1, 1
+   		 li $a2, 0
+  		  syscall  # File descriptor gets returned in $v0
+  		
+		file_write:
+    		  # Syscall 15 requieres file descriptor in $a0
+    		 move $a0, $v0
+   		 li $v0, 15
+   		 la $a1, buffer
+  		  la $a2, bufferend
+   		 la $a3, buffer
+   		 subu $a2, $a2, $a3  # computes the length of the string, this is really a constant
+   	 syscall
+file_close:
+    li $v0, 16  # $a0 already has the file descriptor
+     
 		j start
 	exit:
 .end_macro
