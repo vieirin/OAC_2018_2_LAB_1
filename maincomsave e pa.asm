@@ -1,13 +1,11 @@
-.globl exitMessage gaussian3
+.globl exitMessage
 .include "macros.asm"
 .include "fileops.asm"
-.include "edgeExtractor.asm"
 
 .data
 	image:		.space 1048576 # (4 * words amount)
 	imageRows:	.word 512
 	imageCols:	.word 512
-	gaussian3:	.space 96
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
@@ -115,7 +113,7 @@
 	save:
 		la $a0,image
 		la $a1,buffer
-		addi $a1,$a1, 786483
+		addi $a1,$a1,54
 		org_buffer($a0,$a1)
 		file_open:
    		 li $v0, 13
@@ -170,10 +168,8 @@ main:
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
-	# menu() 
-	la $a0, image
-	gaussianBlur($a0, $s2)
-	extractBorders($a0, $s2)
+		la $a0,image
+	menu($a0,$s2)
 	li $v0, 4
 	la $a0, backtomain
 	syscall
