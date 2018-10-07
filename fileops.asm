@@ -49,30 +49,82 @@
 	fpnull:
 .end_macro
 
-.macro org_buffer(%ip,%bp)
+.macro org_buffer(%image_pointer,%bp)
+	showImage(%image_pointer)
+
+	move $t1,%image_pointer
+	li $t1, 0	
 	loop:
-	li $t1, 0
-	addi %bp,%bp,54
-	lbu $t0, 0(%ip)
+	lbu $t0, 0(%image_pointer)
 	sb $t0, 0(%bp)
 	addi %bp, %bp, 1
-	addi %ip, %ip, 1
+	addi %image_pointer, %image_pointer, 1
 	
-	lbu $t0, 0(%ip)
+	lbu $t0, 0(%image_pointer)
 	sb $t0, 0(%bp)
 	addi %bp, %bp, 1
-	addi %ip, %ip, 1
+	addi %image_pointer, %image_pointer, 1
 	
-	lbu $t0, 0(%ip)
+	lbu $t0, 0(%image_pointer)
 	sb $t0, 0(%bp)
 	addi %bp, %bp, 1
-	addi %ip, %ip, 2
+	addi %image_pointer, %image_pointer, 2
 	
 	addi $t1,$t1,3
-	beq $t1,786486,end
+	beq $t1,786432,exit
 	j loop
-	end:
+exit:	
 .end_macro
-	
 
+.macro showImage (%image_pointer)
+	li $t3, 1048576
+	move $t1, %image_pointer #começo
+	add $t3,%image_pointer,$t3 #fim
+	move $t2,%image_pointer
+
+loop: #vira de cabeça pra cima
+	lw $t6,0($t1)
+	lw $t7,0($t3)
+	add $t4,$t6,$zero
+	add $t6,$t7,$zero
+	add $t7,$t4,$zero
+	sw $t6, 0($t1)
+	sw $t7 ,0($t3)
+	addi $t1, $t1,4
+	addi $t3,$t3,-4
+	bne $t3,$t1,loop			
 	
+	move $t1,%image_pointer
+	addi $t8,$zero,512 #número de linhas que o loop deverá passar 
+	
+loopespelho:#loop das linas
+	add $t3,$t1,2048
+	addi $t9,$zero,256 #número de repetições da troca de colunas 
+loopinterno:#loop das colunas
+	lw $t6,0($t1)
+	lw $t7,0($t3)
+	add $t4,$t6,$zero
+	add $t6,$t7,$zero
+	add $t7,$t4,$zero
+	sw $t6, 0($t1)
+	sw $t7 ,0($t3)
+	addi $t1, $t1,4
+	addi $t3,$t3,-4
+	addi $t9,$t9,-1
+	bne $t9,0,loopinterno
+	
+	add $t1,$t1,1024
+	addi $t8,$t8,-1
+	bne $t8,0,loopespelho
+
+	li $t3, 1048576
+	add $t3,%image_pointer,$t3 
+loop2:#loop de impressão
+  	lw $t4, ($t2) # move from space to register
+	sw $t4, ($gp)
+	addi $gp, $gp, 4
+	addi $t2,$t2,4
+	#bne $t2,%image_pointer,loop
+	bne $t2, $t3, loop2
+
+.end_macro

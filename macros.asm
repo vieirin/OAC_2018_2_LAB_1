@@ -81,7 +81,6 @@ loop2:
 	sb $t0, 0($t2)     	#
 	sb $t0, 1($t2)    	#
 	sb $t0, 2($t2)    	#
-	
 	#### Binary Threshold ####
 	
 	lw $t4, ($t2)
@@ -94,6 +93,7 @@ Black:
 continue:	
 	
 	sw $t4, ($t2)
+	
 	addi $t2,$t2,4
 	ble $t2, $t3, loop2
 	
