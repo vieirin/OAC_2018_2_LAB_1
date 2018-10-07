@@ -137,24 +137,11 @@
 	move $t8, $zero
 	j row
 	convolute:
-		slt $t9, $t8, $zero
-		bnez $t9, shiftt8
-			li $t8, 0xff
-			j notShift8			
-		shiftt8: li $t8, 0x0
-		notShift8:
-		slt $t9, $t7, $zero
-		bnez $t9, shiftt7
-			li $t7, 0xff
-			j notShift7
-		shiftt7: li $t7 0x0
-		notShift7:
-		slt $t9, $t6, $zero
-		bnez $t9, shiftt6
-			li $t6, 0xff
-			j notShift6
-		shiftt6: li $t6, 0x0
-		notShift6:
+		move $a2, $t8
+		convertScaleAbs($a2)
+		move $t8, $v0
+		move $t7, $v0
+		move $t6, $v0
 		sll $t7, $t7, 8
 	        sll $t8, $t8, 16
 		or $t6, $t6, $t7
@@ -216,6 +203,19 @@
 		bne $t0, $t1, loop 
 .end_macro
 
+.macro convertScaleAbs(%component)
+	sll %component, %component, 1
+	slt $t9, $zero, %component
+	bnez $t9, return
+		li $a3, -1
+		mul $v0, %component, $a3
+		j exit
+	return:
+		move $v0, %component
+	exit:
+
+.end_macro
+
 .macro getKernelValue(%x, %y)
   addi $t9, %y, 1 #due to logic at above function we need to sum j up to 1
   bnez %x, xNotZero
@@ -244,12 +244,26 @@
 .end_macro
 
 .macro getLaplacianValue(%x, %y)
-	addi $t9, %y, 1
-	bne %x, 1, return
-		bne $t9, 1, return
-			li $v0, 8
-			j exit
-	return:
-		li $v0, -1
-	exit:
+  addi $t9, %y, 1 #due to logic at above function we need to sum j up to 1
+  bnez %x, xNotZero
+    beqz $t9, return0
+    beq $t9, 1, return1
+    beq $t9, 2, return0
+  xNotZero:
+    bne %x, 1, xNotOne
+      beqz $t9, return1
+      beq $t9, 1, return4
+      beq $t9, 2, return1
+  xNotOne:
+    beqz $t9, return0
+    beq $t9, 1, return1
+    beq $t9, 2, return0
+      
+  return0: move $v0, $zero
+      j return
+  return1: li $v0, 1
+      j return
+  return4: li $v0, -4
+      j return
+  return:
 .end_macro
