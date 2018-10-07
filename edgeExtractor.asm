@@ -41,167 +41,32 @@
 			add $t3, $t3, $t2            # $t3 += j
 			sll $t3, $t3, 2		     # $t3 *= 4
 			add $t3, $t0, $t3	     # pxAddr (or $t3) = %image_pointer +/- 512*(i-1) + j
-			bne $t2, -1, notFirst
+			getKernelValue($t1, $t2)
 			# loads bytes to $t6, $t7, $t8
 			lbu $t4, ($t3)
-			move $t9, $t4
 			mtc1 $t4, $f3
 			cvt.s.w $f3, $f3
 			mul.s $f3, $f3, $f0
 			cvt.w.s $f3, $f3
 			mfc1 $t4, $f3
-			multJ($t9, $t1)
-			add $t4, $t4, $v0
 			addu $t6, $t6, $t4
 			
-			addi $t3, $t3,1
-			
-			lbu $t4, 0($t3)
-			move $t9, $t4
-			mtc1 $t4, $f3 
-			cvt.s.w $f3, $f3
-			mul.s $f3, $f3, $f0
-			cvt.w.s $f3, $f3
-			mfc1 $t4, $f3
-		 	multJ($t9, $t1)
-			add $t4, $t4, $v0
-			addu $t7, $t7, $t4
-	
-			addi $t3, $t3, 1
-
 			lbu $t4, ($t3)
-			move $t9, $t4
-			mtc1 $t4, $f3 
+			mtc1 $t4, $f3
 			cvt.s.w $f3, $f3
 			mul.s $f3, $f3, $f0
 			cvt.w.s $f3, $f3
 			mfc1 $t4, $f3
-		 	multJ($t9, $t1)
-			add $t4, $t4, $v0
+			addu $t7, $t7, $t4
+			
+			lbu $t4, ($t3)
+			mtc1 $t4, $f3
+			cvt.s.w $f3, $f3
+			mul.s $f3, $f3, $f0
+			cvt.w.s $f3, $f3
+			mfc1 $t4, $f3
 			addu $t8, $t8, $t4
 			
-			add $t3, $t3, 2	
-			j continue
-			notFirst:
-				bne $t1, 1, notCentral
-					lbu $t4, ($t3)
-					move $t9, $t4
-					mtc1 $t4, $f3 
-					cvt.s.w $f3, $f3
-					mul.s $f3, $f3, $f4
-					cvt.w.s $f3, $f3
-					mfc1 $t4, $f3
-			 		multJ($t9, $t1)
-					add $t4, $t4, $v0
-					addu $t6, $t6, $t4
-			
-					addi $t3, $t3,1
-			
-					lbu $t4, 0($t3)
-					move $t9, $t4
-					mtc1 $t4, $f3 
-					cvt.s.w $f3, $f3
-					mul.s $f3, $f3, $f4
-					cvt.w.s $f3, $f3
-					mfc1 $t4, $f3
-			 		multJ($t9, $t1)
-					add $t4, $t4, $v0
-					addu $t7, $t7, $t4
-	
-					addi $t3, $t3, 1
-	
-					lbu $t4, ($t3)
-					move $t9, $t4
-					mtc1 $t4, $f3 
-					cvt.s.w $f3, $f3
-					mul.s $f3, $f3, $f4
-					cvt.w.s $f3, $f3
-					mfc1 $t4, $f3
-		 			multJ($t9, $t1)
-					add $t4, $t4, $v0
-					addu $t8, $t8, $t4
-					add $t3, $t3, 2	
-					j continue
-				# loads bytes to $t6, $t7, $t8
-				notCentral:
-				lbu $t4, ($t3)
-				move $t9, $t4
-				mtc1 $t4, $f3 
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f1
-				cvt.w.s $f3, $f3
-				mfc1 $t4, $f3
-		 		multJ($t9, $t1)
-				add $t4, $t4, $v0
-				addu $t6, $t6, $t4
-			
-				addi $t3, $t3,1
-			
-				lbu $t4, 0($t3)
-				move $t9, $t4
-				mtc1 $t4, $f3 
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f1
-				cvt.w.s $f3, $f3
-				mfc1 $t4, $f3
-		 		multJ($t9, $t1)
-				add $t4, $t4, $v0
-				addu $t7, $t7, $t4
-	
-				addi $t3, $t3, 1
-
-				lbu $t4, ($t3)
-				move $t9, $t4
-				mtc1 $t4, $f3 
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f1
-				cvt.w.s $f3, $f3
-				mfc1 $t4, $f3
-		 		multJ($t9, $t1)
-				add $t4, $t4, $v0
-				addu $t8, $t8, $t4
-				add $t3, $t3, 2	
-				j continue
-			notSecond:
-				lbu $t4, ($t3)
-				move $t9, $t4
-				mtc1 $t4, $f3 
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f2
-				cvt.w.s $f3, $f3
-				mfc1 $t4, $f3
-				multJ($t9, $t1)
-				add $t4, $t4, $v0
-				addu $t6, $t6, $t4
-			
-				addi $t3, $t3,1
-			
-				lbu $t4, 0($t3)
-				move $t9, $t4
-				mtc1 $t4, $f3 
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f2
-				cvt.w.s $f3, $f3
-				mfc1 $t4, $f3
-				multJ($t9, $t1)
-				add $t4, $t4, $v0
-				addu $t7, $t7, $t4
-	
-				addi $t3, $t3, 1
-
-				lbu $t4, ($t3)
-				move $t9, $t4
-				mtc1 $t4, $f3 
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f2
-				cvt.w.s $f3, $f3
-				mfc1 $t4, $f3
-				multJ($t9, $t1)
-				add $t4, $t4, $v0
-				addu $t8, $t8, $t4
-				add $t3, $t3, 2	
-				j continue
-			continue:
 			addi $t2, $t2, 1
 			ble $t2, 2, col 
 			j row
@@ -250,5 +115,32 @@
 			mul.s $f3, $f3, $f2
 			cvt.w.s $f3, $f3
 			mfc1 $v0, $f3
+	return:
+.end_macro
+
+.macro getKernelValue(%x, %y)
+	addi $t2, $t2, 1 #due to logic at above function we need to sum j up to 1
+	bnez %x, xNotZero
+		beqz %y, returnF0
+		beq %y, 1, returnF1
+		beq %y, 2, returnF2
+	xNotZero:
+		bne %x, 1, xNotOne
+			beqz %y, returnF1
+			beq %y, 1, returnF4
+			beq %y, 2, returnF2
+	xNotOne:
+		beqz %y, returnF0
+		beq %y, 1, returnF1
+		beq %y, 2, returnF2
+	
+	
+	returnF0: mov.s $f5, $f0
+		  j return
+	returnF1: mov.s $f5, $f1
+		  j return
+	returnF2: mov.s $f5, $f2
+		  j return
+	returnF4: mov.s $f5, $f4
 	return:
 .end_macro
