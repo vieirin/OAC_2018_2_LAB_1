@@ -6,6 +6,7 @@
 	image:		.space 1048576 # (4 * words amount)
 	imageRows:	.word 512
 	imageCols:	.word 512
+	debugdepobre: .space 20000
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
