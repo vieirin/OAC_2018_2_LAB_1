@@ -72,7 +72,7 @@ internalLoop:
 	
 loop2:
   	
-	lbu $t0 0($t2)		#
+	lbu $t0, 0($t2)		#
 	lbu $t5,1($t2)		#
 	lbu $t6,2($t2)		#
 	add $t0,$t0,$t5		# GRAYSCALE
@@ -114,7 +114,7 @@ continue:
 	li $t3,3
 	j loopKernel1
 loopBlur:	
-	li $t9,510 #Número de colunas. Valor é 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
+	li $t9,510 #Nï¿½mero de colunas. Valor ï¿½ 512 - 8 para 3x3 512 - 16 para 5x5 e - 24 para 7x7
 	
 	addi $t0,$t0,8
 	addi $t8,$t8,-1

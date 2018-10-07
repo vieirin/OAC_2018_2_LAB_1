@@ -121,29 +121,135 @@
 	return:
 .end_macro
 
+.macro extractBorders(%image_pointer, %size)
+	convertGray(%image_pointer, %size)
+	add $t5, %image_pointer, %size
+	li $a1, 3
+	li $t0, 513
+	sll $t0, $t0, 2
+	add %image_pointer, %image_pointer, $t0 # starts at (1,1)
+	add $t5, $t5, $t0 # end at (510, 510)
+	move $t0, %image_pointer # %image_pointer
+	li $t1, -1 # i counter
+
+	move $t6, $zero # reset rgb regs
+	move $t7, $zero
+	move $t8, $zero
+	j row
+	convolute:
+		slt $t9, $t8, $zero
+		bnez $t9, shiftt8
+			li $t8, 0xff
+			j notShift8			
+		shiftt8: li $t8, 0x0
+		notShift8:
+		slt $t9, $t7, $zero
+		bnez $t9, shiftt7
+			li $t7, 0xff
+			j notShift7
+		shiftt7: li $t7 0x0
+		notShift7:
+		slt $t9, $t6, $zero
+		bnez $t9, shiftt6
+			li $t6, 0xff
+			j notShift6
+		shiftt6: li $t6, 0x0
+		notShift6:
+		sll $t7, $t7, 8
+	        sll $t8, $t8, 16
+		or $t6, $t6, $t7
+		or $t6, $t6, $t8
+		sw $t6, 0($t0)
+		bge $t0, $t5, return # if at last pixel goto return 
+		move $t1, $zero # i resets to 0
+		add $t0, $t0, 4 # next image pixel
+		move $t6, $zero # reset rgb regs
+		move $t7, $zero
+		move $t8, $zero
+		bne $t0, 510, row
+		add $t0, $t0, 12 # if last pixel jump two pixels ahead
+		row:
+			li $t2, -1                   # j = -1
+			addi $t1, $t1, 1             # i++
+			bgt $t1, 2, convolute
+		col: 
+			beq $t2, 2, row
+			addi $t3, $t1, -1            # i - 1 
+			mul $t3, $t3, 512            # 512 * (i - 1) 
+			add $t3, $t3, $t2            # $t3 += j
+			sll $t3, $t3, 2		     # $t3 *= 4
+			add $t3, $t0, $t3	     # pxAddr (or $t3) = %image_pointer +/- 512*(i-1) + j
+			getLaplacianValue($t1, $t2)
+			# loads bytes to $t6, $t7, $t8
+			lbu $t4, ($t3)
+			mul $t4, $t4, $v0
+			addu $t6, $t6, $t4
+			addu $t7, $t7, $t4
+			addu $t8, $t8, $t4
+			
+			addi $t3, $t3, 4
+			
+			addi $t2, $t2, 1
+			ble $t2, 2, col 
+			j row
+	return: 
+
+.end_macro
+
+.macro convertGray(%image_pointer, %size)
+	move $t0, %image_pointer
+	add $t1, %image_pointer, %size
+	li $t2, 10
+	#weights
+	li $t5, 3
+	loop:
+		lbu $t2, 0($t0)		#
+		lbu $t3, 1($t0)		#
+		lbu $t4, 2($t0)	 	#
+		add $t2, $t2, $t3		# GRAYSCALE
+		add $t2, $t2, $t4		#
+		divu $t2, $t2, $t5	#
+		sb $t2, 0($t0)     	#
+		sb $t2, 1($t0)    	#
+		sb $t2, 2($t0)    	#
+		addi $t0, $t0, 4
+		bne $t0, $t1, loop 
+.end_macro
+
 .macro getKernelValue(%x, %y)
-	addi $t9, %y, 1 #due to logic at above function we need to sum j up to 1
-	bnez %x, xNotZero
-		beqz $t9, returnF0
-		beq $t9, 1, returnF1
-		beq $t9, 2, returnF2
-	xNotZero:
-		bne $t9, 1, xNotOne
-			beqz $t9, returnF1
-			beq $t9, 1, returnF4
-			beq $t9, 2, returnF2
-	xNotOne:
-		beqz $t9, returnF0
-		beq $t9, 1, returnF1
-		beq $t9, 2, returnF2
-	
-	
-	returnF0: mov.s $f5, $f0
-		  j return
-	returnF1: mov.s $f5, $f1
-		  j return
-	returnF2: mov.s $f5, $f2
-		  j return
-	returnF4: mov.s $f5, $f4
+  addi $t9, %y, 1 #due to logic at above function we need to sum j up to 1
+  bnez %x, xNotZero
+    beqz $t9, returnF0
+    beq $t9, 1, returnF1
+    beq $t9, 2, returnF2
+  xNotZero:
+    bne %x, 1, xNotOne
+      beqz $t9, returnF1
+      beq $t9, 1, returnF4
+      beq $t9, 2, returnF1
+  xNotOne:
+    beqz $t9, returnF0
+    beq $t9, 1, returnF1
+    beq $t9, 2, returnF2
+  
+  
+  returnF0: mov.s $f5, $f0
+      j return
+  returnF1: mov.s $f5, $f1
+      j return
+  returnF2: mov.s $f5, $f2
+      j return
+  returnF4: mov.s $f5, $f4
+  return:
+.end_macro
+
+.macro getLaplacianValue(%x, %y)
+	addi $t9, %y, 1
+	bne %x, 1, return
+		bne $t9, 1, return
+			li $v0, 8
+			j exit
 	return:
+		li $v0, -1
+	exit:
 .end_macro

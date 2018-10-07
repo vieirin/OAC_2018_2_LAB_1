@@ -144,9 +144,10 @@ main:
 	# prepares showImage args
 		# a0: pointer to buffer start
 		# a1: rowXcols value (once buffer is a memory array)
-	# menu()
+	# menu() 
 	la $a0, image
 	gaussianBlur($a0, $s2)
+	extractBorders($a0, $s2)
 	li $v0, 4
 	la $a0, backtomain
 	syscall
