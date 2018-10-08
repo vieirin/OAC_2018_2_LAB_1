@@ -74,7 +74,7 @@
 			ble $t2, 2, col 
 			j row
 	return:
-	
+		move $t5, $a0
 .end_macro
 
 .macro createKernel(%kernel_size)
@@ -89,38 +89,6 @@
 	mtc1 $t0, $f4
 .end_macro
 
-.macro multJ(%componentValue, %col)
-	bne %col, 0, notFirst
-		mtc1 %componentValue, $f3
-		cvt.s.w $f3, $f3
-		mul.s $f3, $f3, $f0
-		cvt.w.s $f3, $f3
-		mfc1 $v0, $f3
-		j return
-	notFirst:
-		bne %col, 1, notSecond
-			mtc1 %componentValue, $f3
-			bne $t2, 1, notCentral
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f4
-				cvt.w.s $f3, $f3
-				mfc1 $v0, $f3
-			notCentral:
-				cvt.s.w $f3, $f3
-				mul.s $f3, $f3, $f1
-				cvt.w.s $f3, $f3
-				mfc1 $v0, $f3
-			j return
-	notSecond:
-		bne %col, 2, return
-			mtc1 %componentValue, $f3
-			cvt.s.w $f3, $f3
-			mul.s $f3, $f3, $f2
-			cvt.w.s $f3, $f3
-			mfc1 $v0, $f3
-	return:
-.end_macro
-
 .macro extractBorders(%image_pointer, %size)
 	convertGray(%image_pointer, %size)
 	add $t5, %image_pointer, %size
@@ -128,33 +96,24 @@
 	li $t0, 513
 	sll $t0, $t0, 2
 	add %image_pointer, %image_pointer, $t0 # starts at (1,1)
-	add $t5, $t5, $t0 # end at (510, 510)
+	sub $t5, $t5, $t0 # end at (510, 510)
 	move $t0, %image_pointer # %image_pointer
 	li $t1, -1 # i counter
-
+	li $t9, 1 # pixel line counter
 	move $t6, $zero # reset rgb regs
-	move $t7, $zero
-	move $t8, $zero
+	li $s6, 1023 # min value
+	li $s7, -1023 # max value
 	j row
 	convolute:
-		move $a2, $t8
-		convertScaleAbs($a2)
-		move $t8, $v0
-		move $t7, $v0
-		move $t6, $v0
-		sll $t7, $t7, 8
-	        sll $t8, $t8, 16
-		or $t6, $t6, $t7
-		or $t6, $t6, $t8
 		sw $t6, 0($t0)
 		bge $t0, $t5, return # if at last pixel goto return 
 		move $t1, $zero # i resets to 0
 		add $t0, $t0, 4 # next image pixel
+		addi $t9, $t9, 1
 		move $t6, $zero # reset rgb regs
-		move $t7, $zero
-		move $t8, $zero
-		bne $t0, 510, row
+		bne $t9, 510, row
 		add $t0, $t0, 12 # if last pixel jump two pixels ahead
+		li $t9, 1
 		row:
 			li $t2, -1                   # j = -1
 			addi $t1, $t1, 1             # i++
@@ -171,8 +130,6 @@
 			lbu $t4, ($t3)
 			mul $t4, $t4, $v0
 			addu $t6, $t6, $t4
-			addu $t7, $t7, $t4
-			addu $t8, $t8, $t4
 			
 			addi $t3, $t3, 4
 			
@@ -180,7 +137,21 @@
 			ble $t2, 2, col 
 			j row
 	return: 
+		scaleImage(%image_pointer, %size)
+.end_macro
 
+.macro scaleImage(%image_pointer, %size)
+	move $t0, %image_pointer
+	add $t3, %image_pointer, %size
+	loop:
+		lbu $t2, 0($t0)		#
+		convertScaleAbs($t2)
+		sb $t2, 0($t0)     	#
+		sb $t2, 1($t0)    	#
+		sb $t2, 2($t0)    	#
+		sb $zero, 3($t0)
+		addi $t0, $t0, 4
+		bne $t0, $t3, loop
 .end_macro
 
 .macro convertGray(%image_pointer, %size)
@@ -204,16 +175,17 @@
 .end_macro
 
 .macro convertScaleAbs(%component)
-	srl %component, %component, 2
-	slt $t9, %component, $zero
-	beqz $t9, return
-		li $a3, -1
-		mul $v0, %component, $a3
-		j exit
+	bgtz %component, checknearz
+		li %component, 0x00
+		j return
+	checknearz:
+		bge %component, 56, blackPixel
+			li %component 0x80 # near zero = 128
+		j return
+	blackPixel:
+		li %component, 0xFF
+		j return
 	return:
-		move $v0, %component
-	exit:
-
 .end_macro
 
 .macro getKernelValue(%x, %y)
@@ -261,9 +233,9 @@
       
   return0: move $v0, $zero
       j return
-  return1: li $v0, 1
+  return1: li $v0, -1
       j return
-  return4: li $v0, -4
+  return4: li $v0, 4
       j return
   return:
 .end_macro

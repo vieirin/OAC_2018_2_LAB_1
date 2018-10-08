@@ -5,9 +5,9 @@
 
 .data
 	image:		.space 1048576 # (4 * words amount)
+	gaussian3:	.space 200000
 	imageRows:	.word 512
 	imageCols:	.word 512
-	gaussian3:	.space 96
 	inFilename:	.asciiz "img.bmp" #defines filename for opening
 	exitMessage:	.asciiz "Something went wrong"
 	backtomain:	.asciiz "back to main"
@@ -90,7 +90,12 @@
 		ble $v0,3,contedge
 		j edgeread
 	contedge: 
-
+		la $a0, image
+		gaussianBlur($a0, $s2)
+		la $a0, image
+		extractBorders($a0, $s2)
+		la $a0, image
+		move $t0, $a0
 		j start #returns to main menu
 	
 	binam: #binary threshold menu
@@ -172,8 +177,7 @@ main:
 		# a1: rowXcols value (once buffer is a memory array)
 	# menu() 
 	la $a0, image
-	gaussianBlur($a0, $s2)
-	extractBorders($a0, $s2)
+	menu($a0,$s2)
 	li $v0, 4
 	la $a0, backtomain
 	syscall
