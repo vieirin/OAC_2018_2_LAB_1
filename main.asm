@@ -177,7 +177,16 @@ main:
 		# a1: rowXcols value (once buffer is a memory array)
 	# menu() 
 	la $a0, image
+
 	menu($a0,$s2)
+
+	lw $t0, imageRows
+	lw $t1, imageCols
+	mulu $a1, $t0, $t1 # 512 * 512
+	#li $a1, 1048576
+	showImage($a0, $a1)
+	#showBlackWhite ($a0, $a1)
+
 	li $v0, 4
 	la $a0, backtomain
 	syscall
